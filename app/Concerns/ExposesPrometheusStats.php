@@ -83,11 +83,21 @@ trait ExposesPrometheusStats
         return $namespace;
     }
 
+    /**
+     * Get the Prometheus labels.
+     *
+     * @return array
+     */
     protected function getPrometheusLabels(): array
     {
         return array_keys($this->getPrometheusLabelsWithValues());
     }
 
+    /**
+     * Get the Prometheus labels with their values.
+     *
+     * @return array
+     */
     protected function getPrometheusLabelsWithValues(): array
     {
         return collect($this->option('prometheus-label'))
