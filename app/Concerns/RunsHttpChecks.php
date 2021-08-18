@@ -3,19 +3,20 @@
 namespace App\Concerns;
 
 use Illuminate\Support\Facades\Http;
-use React\EventLoop\LoopInterface;
+use React\EventLoop\Loop;
 
 trait RunsHttpChecks
 {
     /**
      * Run the HTTP checks for the current command.
      *
-     * @param \React\EventLoop\LoopInterface  $loop
      * @return void
      */
-    protected function runHttpChecks(LoopInterface $loop): void
+    protected function runHttpChecks(): void
     {
         /** @var \App\Commands\WatchResource $this */
+
+        $loop = Loop::get();
 
         $loop->addPeriodicTimer($this->option('interval'), function () use ($loop) {
             $client = Http::asJson()
@@ -77,14 +78,14 @@ trait RunsHttpChecks
                 $this->responseSucceeded();
             }
 
+            if ($this->option('once')) {
+                $loop->stop();
+            }
+
             $this->line(
                 string: 'Waiting between requests...',
                 verbosity: 'v',
             );
-
-            if ($this->option('once')) {
-                $loop->stop();
-            }
         });
     }
 }
