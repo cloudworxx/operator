@@ -2,12 +2,20 @@
 
 namespace App\Commands;
 
+use App\Concerns\ExposesPrometheusStats;
 use App\Concerns\RunsHttpChecks;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
+use Prometheus\RenderTextFormat;
+use Psr\Http\Message\ServerRequestInterface;
+use React\EventLoop\Loop;
+use React\Http\HttpServer;
+use React\Http\Message\Response;
+use React\Socket\SocketServer;
 
 class WatchResource extends Command
 {
+    use ExposesPrometheusStats;
     use RunsHttpChecks;
 
     /**
@@ -19,16 +27,18 @@ class WatchResource extends Command
         {--http-url= : The HTTP url to call. Setting this will use the HTTP request method.}
         {--method=GET : The method for the HTTP call.}
         {--body= : JSON-formatted string with the body to call.}
+        {--post-as-form : Send the request as form, with the application/x-www-form-urlencoded header.}
         {--headers= : JSON-formatted list of key-value strings to set as heaers.}
-        {--accept=application/json : The Accept header value.}
+        {--accept-header=application/json : The Accept header value.}
         {--timeout=10 : The timeout of the request, in seconds.}
         {--interval=10 : The interval between checks, in seconds.}
         {--username= : The HTTP basic auth username. Enabling this will overwrite the --token value.}
         {--password= : The HTTP basic auth password. }
         {--digest-auth : Wether to use digest auth instead of plain auth.}
         {--bearer-token= : The Bearer token to authorize the request. Gets overwritten if --username is set.}
-        {--post-as-form : Send the request as form, with the application/x-www-form-urlencoded header.}
         {--once : Perform only one check, without monitoring the resource.}
+        {--prometheus-identifier= : The identifier for Prometheus exports.}
+        {--prometheus-label=* : Array list of value strings to set as Prometheus labels.}
     ';
 
     /**
@@ -45,9 +55,56 @@ class WatchResource extends Command
      */
     public function handle()
     {
+        $this->initializeHttpServer();
+
+        $loop = Loop::get();
+
         if ($this->option('http-url') ?: env('HTTP_URL')) {
-            return $this->runHttpChecks();
+            $this->line('Setting the HTTP checks protocol...');
+            $this->runHttpChecks($loop);
         }
+    }
+
+    /**
+     * Handle whenever a response succeeded.
+     *
+     * @return void
+     */
+    protected function responseSucceeded(): void
+    {
+        $this->markUptime();
+    }
+
+    /**
+     * Handle whenever the response failed.
+     *
+     * @return void
+     */
+    protected function responseFailed(): void
+    {
+        $this->markDowntime();
+    }
+
+    /**
+     * Create a new HTTP server.
+     *
+     * @return void
+     */
+    protected function initializeHttpServer(): void
+    {
+        $http = new HttpServer(function (ServerRequestInterface $request) {
+            return new Response(
+                status: 200,
+                headers: [
+                    'Content-Type' => RenderTextFormat::MIME_TYPE,
+                ],
+                body: (new RenderTextFormat)->render($this->prometheus->getMetricFamilySamples()),
+            );
+        });
+
+        $http->listen(
+            $socket = new SocketServer('0.0.0.0:80')
+        );
     }
 
     /**
@@ -59,10 +116,5 @@ class WatchResource extends Command
     public function schedule(Schedule $schedule): void
     {
         // $schedule->command(static::class)->everyMinute();
-    }
-
-    protected function responseFailed(): void
-    {
-        dd(1);
     }
 }

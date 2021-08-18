@@ -3,24 +3,26 @@
 namespace App\Concerns;
 
 use Illuminate\Support\Facades\Http;
+use React\EventLoop\LoopInterface;
 
 trait RunsHttpChecks
 {
     /**
      * Run the HTTP checks for the current command.
      *
+     * @param \React\EventLoop\LoopInterface  $loop
      * @return void
      */
-    protected function runHttpChecks(): void
+    protected function runHttpChecks(LoopInterface $loop): void
     {
         /** @var \App\Commands\WatchResource $this */
 
-        while (true) {
+        $loop->addPeriodicTimer($this->option('interval'), function () use ($loop) {
             $client = Http::asJson()
-                ->accept($this->option('accept') ?: env('HTTP_ACCEPT_HEADER'))
-                ->timeout($this->option('timeout') ?: env('HTTP_TIMEOUT'));
+                ->accept($this->option('accept-header'))
+                ->timeout($this->option('timeout'));
 
-            if ($this->option('post-as-form') ?: env('HTTP_POST_AS_FORM')) {
+            if ($this->option('post-as-form')) {
                 $client->asForm();
             }
 
@@ -29,7 +31,7 @@ trait RunsHttpChecks
             }
 
             if ($headers = $this->option('headers') ?: env('HTTP_HEADERS')) {
-                $client->withHeaders(json_decode($headers));
+                $client->withHeaders(json_decode($headers, true));
             }
 
             // Authentication
@@ -60,7 +62,7 @@ trait RunsHttpChecks
                 $client->withToken($token);
             }
 
-            $response = $client->{$this->option('method') ?: env('HTTP_METHOD')}(
+            $response = $client->{$this->option('method')}(
                 $this->option('http-url') ?: env('HTTP_URL')
             );
 
@@ -71,6 +73,8 @@ trait RunsHttpChecks
                 );
 
                 $this->responseFailed();
+            } else {
+                $this->responseSucceeded();
             }
 
             $this->line(
@@ -78,11 +82,9 @@ trait RunsHttpChecks
                 verbosity: 'v',
             );
 
-            sleep($this->option('interval') ?: env('REQUEST_INTERVAL'));
-
             if ($this->option('once')) {
-                break;
+                $loop->stop();
             }
-        }
+        });
     }
 }

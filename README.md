@@ -1,36 +1,93 @@
-<p align="center">
-    <img title="Laravel Zero" height="100" src="https://raw.githubusercontent.com/laravel-zero/docs/master/images/logo/laravel-zero-readme.png" />
-</p>
+Soketi Network Watcher
+=======================
 
-<p align="center">
-  <a href="https://github.com/laravel-zero/framework/actions"><img src="https://img.shields.io/github/workflow/status/laravel-zero/framework/Tests.svg" alt="Build Status"></img></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/dt/laravel-zero/framework.svg" alt="Total Downloads"></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/v/laravel-zero/framework.svg?label=stable" alt="Latest Stable Version"></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/l/laravel-zero/framework.svg" alt="License"></a>
-</p>
+![CI](https://github.com/opsie/operator/workflows/CI/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/opsie/operator/branch/master/graph/badge.svg)](https://codecov.io/gh/opsie/operator)
+[![StyleCI](https://github.styleci.io/repos/350800968/shield?branch=master)](https://github.styleci.io/repos/350800968)
 
-<h4> <center>This is a <bold>community project</bold> and not an official Laravel one </center></h4>
+Monitor the [pWS server](https://github.com/soketi/pws) container for memory allowance and new connections when running in Kubernetes.
 
-Laravel Zero was created by, and is maintained by [Nuno Maduro](https://github.com/nunomaduro), and is a micro-framework that provides an elegant starting point for your console application. It is an **unofficial** and customized version of Laravel optimized for building command-line applications.
+## 🤝 Supporting
 
-- Built on top of the [Laravel](https://laravel.com) components.
-- Optional installation of Laravel [Eloquent](https://laravel-zero.com/docs/database/), Laravel [Logging](https://laravel-zero.com/docs/logging/) and many others.
-- Supports interactive [menus](https://laravel-zero.com/docs/build-interactive-menus/) and [desktop notifications](https://laravel-zero.com/docs/send-desktop-notifications/) on Linux, Windows & MacOS.
-- Ships with a [Scheduler](https://laravel-zero.com/docs/task-scheduling/) and  a [Standalone Compiler](https://laravel-zero.com/docs/build-a-standalone-application/).
-- Integration with [Collision](https://github.com/nunomaduro/collision) - Beautiful error reporting
+If you are using one or more Renoki Co. open-source packages in your production apps, in presentation demos, hobby projects, school projects or so, spread some kind words about our work or sponsor our work via Patreon. 📦
 
-------
+You will sometimes get exclusive content on tips about Laravel, AWS or Kubernetes on Patreon and some early-access to projects or packages.
 
-## Documentation
+[<img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" height="41" width="175" />](https://www.patreon.com/bePatron?u=10965171)
 
-For full documentation, visit [laravel-zero.com](https://laravel-zero.com/).
+## 🚀 Installation
 
-## Support the development
-**Do you like this project? Support it by donating**
+```bash
+composer install --ignore-platform-reqs && cp .env.example .env
+```
 
-- PayPal: [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=66BYDWAT92N6L)
-- Patreon: [Donate](https://www.patreon.com/nunomaduro)
+## Running the operator
 
-## License
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --interval=5
+```
 
-Laravel Zero is an open-source software licensed under the MIT license.
+## Increase timeout
+
+The default timeout is `10` seconds, but it may be changed:
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --timeout=30
+```
+
+## Authenticate with Basic Auth or Auth Digest
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --username=admin \
+    --password=secretpassword
+```
+
+To enable digest auth, use `--digest-auth` flag:
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --username=admin \
+    --password=secretpassword \
+    --digest-auth
+```
+
+## Prometheus Export
+
+Using ReactPHP, a HTTP webserver is exposed on port `80` that exports the Prometheus metrics regarding uptime in order to be scraped.
+
+To attach Prometheus labels, pass multiple `key=value` pairs to the `--prometheus-label` flag:
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --prometheus-identifier=my_app \
+    --prometheus-label=user_id=1 \
+    --prometheus-label=app_id=1 \
+    --verbose
+```
+
+## 🐛 Testing
+
+``` bash
+vendor/bin/phpunit
+```
+
+## 🤝 Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## 🔒  Security
+
+If you discover any security related issues, please email alex@renoki.org instead of using the issue tracker.
+
+## 🎉 Credits
+
+- [Alex Renoki](https://github.com/rennokki)
+- [All Contributors](../../contributors)
