@@ -44,7 +44,7 @@ class PrometheusTest extends TestCase
                 );
 
                 return true;
-            }
+            },
         ]);
     }
 }
