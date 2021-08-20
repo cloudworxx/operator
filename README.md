@@ -74,6 +74,21 @@ php artisan watch:resource \
     --verbose
 ```
 
+## Docker
+
+The production versions are being automatically bundled into a Docker image. [Head over to quay.io](https://quay.io/repository/opsie/operator) to see the available versions.
+
+```bash
+$ docker run quay.io/opsie/operator /app/opsie-status-operator watch:resource \
+    --http-url=https://google.com \
+    --verbose
+
+Setting the HTTP checks protocol...
+Website is up.
+[2021-08-20T13:32:20+00:00] HTTP Status: 200
+Waiting between requests...
+```
+
 ## 🐛 Testing
 
 ``` bash
