@@ -25,28 +25,6 @@ trait ExposesPrometheusStats
     protected $pushgateway;
 
     /**
-     * Mark the status as up.
-     *
-     * @return void
-     */
-    protected function markUptime(): void
-    {
-        $this->getPrometheusGauge()->set(1, $this->getPrometheusLabelsWithValues());
-        $this->pingPushgateway();
-    }
-
-    /**
-     * Mark the status as down.
-     *
-     * @return void
-     */
-    protected function markDowntime(): void
-    {
-        $this->getPrometheusGauge()->set(0, $this->getPrometheusLabelsWithValues());
-        $this->pingPushgateway();
-    }
-
-    /**
      * Initialize Prometheus and get the registry.
      *
      * @return \Prometheus\CollectorRegistry

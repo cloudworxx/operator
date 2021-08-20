@@ -21,7 +21,7 @@ trait RunsHttpChecks
                 : Http::asJson();
 
             $client->accept($this->option('accept-header'))
-                ->timeout($this->option('timeout'));
+                ->timeout($this->getTimeout());
 
             if ($headers = $this->option('headers') ?: env('HTTP_HEADERS')) {
                 $client->withHeaders(json_decode($headers, true));
@@ -55,21 +55,24 @@ trait RunsHttpChecks
                 $client->withToken($token);
             }
 
+            /** @var \Illuminate\Http\Client\Response $response */
             $response = $client->{$this->option('method')}(
                 $this->option('http-url') ?: env('HTTP_URL'),
                 json_decode($this->option('body') ?: env('HTTP_BODY'), true),
             );
 
-            if ($response->failed()) {
-                $this->error(
-                    string: 'Response failed.',
-                    verbosity: 'v',
-                );
+            $payload = [
+                'status' => $response->status(),
+                'up' => $response->successful(),
+                'headers' => $response->headers(),
+                'time' => now()->toIso8601String(),
+                'id' => $this->getIdentifier(),
+            ];
 
-                // TODO: Assign error messages to the responseFailed()
-                $this->responseFailed();
+            if ($response->failed()) {
+                $this->markDowntime($payload);
             } else {
-                $this->responseSucceeded();
+                $this->markUptime($payload);
             }
 
             if ($this->option('once')) {

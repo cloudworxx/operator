@@ -4,13 +4,16 @@ namespace App\Commands;
 
 use App\Concerns\ExposesPrometheusStats;
 use App\Concerns\RunsHttpChecks;
+use App\Concerns\SendsWebhooks;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 
 class WatchResource extends Command
 {
     use ExposesPrometheusStats;
     use RunsHttpChecks;
+    use SendsWebhooks;
 
     /**
      * The signature of the command.
@@ -34,6 +37,9 @@ class WatchResource extends Command
         {--prometheus-identifier= : The identifier for Prometheus exports.}
         {--prometheus-label=* : Array list of value strings to set as Prometheus labels.}
         {--pushgateway-url= : The URL for Pushgateway metrics collection.}
+        {--webhook-url=* : Array list of webhook URLs.}
+        {--webhook-secret=* : Array list of secrets to sign the webhook URLs with.}
+        {--identifier= : An unique identifier for the current running process.}
     ';
 
     /**
@@ -57,23 +63,80 @@ class WatchResource extends Command
     }
 
     /**
-     * Handle whenever a response succeeded.
+     * Mark the status as up.
      *
+     * @param  array  $payload
      * @return void
      */
-    protected function responseSucceeded(): void
+    protected function markUptime(array $payload): void
     {
-        $this->markUptime();
+        $this->line(
+            string: 'Website is up.',
+            verbosity: 'v',
+        );
+
+        $this->line(
+            string: "[{$payload['time']}] HTTP Status: {$payload['status']}",
+            verbosity: 'v',
+        );
+
+        $this->getPrometheusGauge()->set(1, $this->getPrometheusLabelsWithValues());
+        $this->pingPushgateway();
+        $this->sendWebhooks($payload);
     }
 
     /**
-     * Handle whenever the response failed.
+     * Mark the status as down.
      *
+     * @param  array  $payload
      * @return void
      */
-    protected function responseFailed(): void
+    protected function markDowntime(array $payload): void
     {
-        $this->markDowntime();
+        $this->error(
+            string: 'Website is down.',
+            verbosity: 'v',
+        );
+
+        $this->error(
+            string: "[{$payload['time']}] HTTP Status: {$payload['status']}",
+            verbosity: 'v',
+        );
+
+        $this->getPrometheusGauge()->set(0, $this->getPrometheusLabelsWithValues());
+        $this->pingPushgateway();
+        $this->sendWebhooks($payload);
+    }
+
+    /**
+     * Get the current CLI identifier.
+     *
+     * @return string
+     */
+    protected function getIdentifier(): string
+    {
+        if ($id = $this->option('identifier')) {
+            return $id;
+        }
+
+        if ($id = env('IDENTIFIER')) {
+            return $id;
+        }
+
+        return Str::uuid();
+    }
+
+    /**
+     * Make sure the timeout does not exceeds the interval.
+     *
+     * @return float
+     */
+    protected function getTimeout(): float
+    {
+        $timeout = (float) $this->option('timeout');
+        $interval = (float) $this->option('interval');
+
+        return $timeout > $interval ? $interval : $timeout;
     }
 
     /**

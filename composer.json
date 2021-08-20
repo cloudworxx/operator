@@ -22,7 +22,8 @@
         "illuminate/support": "^8.55",
         "laravel-zero/framework": "^8.8",
         "promphp/prometheus_client_php": "^2.2",
-        "react/http": "^1.5"
+        "react/http": "^1.5",
+        "spatie/laravel-webhook-server": "^2.1"
     },
     "require-dev": {
         "intonate/tinker-zero": "^1.2",
