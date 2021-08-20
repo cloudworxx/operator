@@ -5,7 +5,7 @@ Soketi Network Watcher
 [![codecov](https://codecov.io/gh/opsie/operator/branch/master/graph/badge.svg)](https://codecov.io/gh/opsie/operator)
 [![StyleCI](https://github.styleci.io/repos/350800968/shield?branch=master)](https://github.styleci.io/repos/350800968)
 
-Monitor the [pWS server](https://github.com/soketi/pws) container for memory allowance and new connections when running in Kubernetes.
+Monitor any website. Run in Docker or any Kubernetes cluster. Send webhooks.
 
 ## 🤝 Supporting
 
