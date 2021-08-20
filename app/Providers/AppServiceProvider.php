@@ -13,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if ($this->app->environment('development')) {
+            $this->app->register(\Intonate\TinkerZero\TinkerZeroServiceProvider::class);
+        }
     }
 
     /**
