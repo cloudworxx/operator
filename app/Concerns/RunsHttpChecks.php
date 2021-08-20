@@ -3,7 +3,6 @@
 namespace App\Concerns;
 
 use Illuminate\Support\Facades\Http;
-use React\EventLoop\Loop;
 
 trait RunsHttpChecks
 {
@@ -16,20 +15,13 @@ trait RunsHttpChecks
     {
         /** @var \App\Commands\WatchResource $this */
 
-        $loop = Loop::get();
+        while (true) {
+            $client = $this->option('post-as-form')
+                ? Http::asForm()
+                : Http::asJson();
 
-        $loop->addPeriodicTimer($this->option('interval'), function () use ($loop) {
-            $client = Http::asJson()
-                ->accept($this->option('accept-header'))
+            $client->accept($this->option('accept-header'))
                 ->timeout($this->option('timeout'));
-
-            if ($this->option('post-as-form')) {
-                $client->asForm();
-            }
-
-            if ($body = $this->option('body') ?: env('HTTP_BODY')) {
-                $client->withBody($body, 'application/json');
-            }
 
             if ($headers = $this->option('headers') ?: env('HTTP_HEADERS')) {
                 $client->withHeaders(json_decode($headers, true));
@@ -64,7 +56,8 @@ trait RunsHttpChecks
             }
 
             $response = $client->{$this->option('method')}(
-                $this->option('http-url') ?: env('HTTP_URL')
+                $this->option('http-url') ?: env('HTTP_URL'),
+                json_decode($this->option('body') ?: env('HTTP_BODY'), true),
             );
 
             if ($response->failed()) {
@@ -73,19 +66,22 @@ trait RunsHttpChecks
                     verbosity: 'v',
                 );
 
+                // TODO: Assign error messages to the responseFailed()
                 $this->responseFailed();
             } else {
                 $this->responseSucceeded();
             }
 
             if ($this->option('once')) {
-                $loop->stop();
+                break;
             }
 
             $this->line(
                 string: 'Waiting between requests...',
                 verbosity: 'v',
             );
-        });
+
+            sleep($this->option('interval'));
+        }
     }
 }

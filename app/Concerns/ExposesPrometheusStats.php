@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Prometheus\Pushgateway;
 use Illuminate\Support\Str;
 use Prometheus\CollectorRegistry;
 use Prometheus\Gauge;
@@ -17,14 +18,21 @@ trait ExposesPrometheusStats
     protected $prometheus;
 
     /**
+     * The Pushgateway instance.
+     *
+     * @var \App\Prometheus\Pushgateway
+     */
+    protected $pushgateway;
+
+    /**
      * Mark the status as up.
      *
      * @return void
      */
     protected function markUptime(): void
     {
-        /** @var \App\Commands\WatchResource $this */
         $this->getPrometheusGauge()->set(1, $this->getPrometheusLabelsWithValues());
+        $this->pingPushgateway();
     }
 
     /**
@@ -34,8 +42,8 @@ trait ExposesPrometheusStats
      */
     protected function markDowntime(): void
     {
-        /** @var \App\Commands\WatchResource $this */
         $this->getPrometheusGauge()->set(0, $this->getPrometheusLabelsWithValues());
+        $this->pingPushgateway();
     }
 
     /**
@@ -65,6 +73,41 @@ trait ExposesPrometheusStats
             help: 'The service uptime, either 1 or 0.',
             labels: $this->getPrometheusLabels(),
         );
+    }
+
+    /**
+     * Ping the Pushgateway metrics.
+     *
+     * @return void
+     */
+    protected function pingPushgateway(): void
+    {
+        /** @var \App\Commands\WatchResource $this */
+
+        if (! $url = $this->option('pushgateway-url')) {
+            return;
+        }
+
+        $this->getPushgatewayClient($url)->push(
+            $this->getPrometheus(),
+            $this->getPrometheusNamespace(),
+            $this->getPrometheusLabelsWithValues(),
+        );
+    }
+
+    /**
+     * Get the Pushgateway client.
+     *
+     * @param  string  $url
+     * @return \App\Prometheus\Pushgateway
+     */
+    protected function getPushgatewayClient(string $url)
+    {
+        if (! $this->pushgateway) {
+            $this->pushgateway = new PushGateway($url);
+        }
+
+        return $this->pushgateway;
     }
 
     /**
