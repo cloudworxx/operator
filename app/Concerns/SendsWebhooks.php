@@ -7,7 +7,7 @@ use Spatie\WebhookServer\WebhookCall;
 trait SendsWebhooks
 {
     /**
-     * Sending the payload to the webhooks
+     * Sending the payload to the webhooks.
      *
      * @param  array  $payload
      * @return void
@@ -15,7 +15,6 @@ trait SendsWebhooks
     protected function sendWebhooks(array $payload): void
     {
         /** @var \App\Commands\WatchResource $this */
-
         foreach ($this->getWebhooksWithSecrets() as $webhook) {
             WebhookCall::create()
                 ->url($webhook['url'])

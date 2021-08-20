@@ -14,7 +14,6 @@ trait RunsHttpChecks
     protected function runHttpChecks(): void
     {
         /** @var \App\Commands\WatchResource $this */
-
         while (true) {
             $client = $this->option('post-as-form')
                 ? Http::asForm()
@@ -46,7 +45,7 @@ trait RunsHttpChecks
 
                     $client->withBasicAuth($username, $password);
                 }
-            } else if ($token = $this->option('bearer-token') ?: env('HTTP_BEARER_TOKEN')) {
+            } elseif ($token = $this->option('bearer-token') ?: env('HTTP_BEARER_TOKEN')) {
                 $this->line(
                     string: 'Setting bearer token...',
                     verbosity: 'v',

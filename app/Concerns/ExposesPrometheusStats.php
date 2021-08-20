@@ -61,7 +61,6 @@ trait ExposesPrometheusStats
     protected function pingPushgateway(): void
     {
         /** @var \App\Commands\WatchResource $this */
-
         if (! $url = $this->option('pushgateway-url')) {
             return;
         }
