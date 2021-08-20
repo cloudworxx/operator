@@ -58,15 +58,16 @@ php artisan watch:resource \
     --digest-auth
 ```
 
-## Prometheus Export
+## Pushgateway Export
 
-Using ReactPHP, a HTTP webserver is exposed on port `80` that exports the Prometheus metrics regarding uptime in order to be scraped.
+Status Operator can push the uptime metrics to a Prometheus instance via Pushgateway. To enable it, a Pushgateway URL should be provided:
 
 To attach Prometheus labels, pass multiple `key=value` pairs to the `--prometheus-label` flag:
 
 ```bash
 php artisan watch:resource \
     --http-url=https://google.com \
+    --pushgateway-url=http://pushgateway.default.svc.kubernetes.local \
     --prometheus-identifier=my_app \
     --prometheus-label=user_id=1 \
     --prometheus-label=app_id=1 \
