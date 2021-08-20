@@ -18,7 +18,7 @@ You will sometimes get exclusive content on tips about Laravel, AWS or Kubernete
 ## 🚀 Installation
 
 ```bash
-composer install --ignore-platform-reqs && cp .env.example .env
+composer install --ignore-platform-reqs
 ```
 
 ## Running the operator
