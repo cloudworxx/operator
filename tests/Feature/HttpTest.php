@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
+use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
 class HttpTest extends TestCase
@@ -150,6 +152,8 @@ class HttpTest extends TestCase
             'webhook2.test' => Http::response('OK', 200),
         ]);
 
+        Queue::fake();
+
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
             '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
@@ -163,11 +167,22 @@ class HttpTest extends TestCase
 
                 return true;
             },
-            function (Request $request) {
-                dd($request);
-
-                return true;
-            }
         ]);
+
+        Queue::assertPushed(CallWebhookJob::class, function ($job) {
+            $this->assertEquals('post', $job->httpVerb);
+            $this->assertEquals(1, $job->tries);
+            $this->assertEquals('Opsiebot/1.0', $job->headers['User-Agent']);
+            $this->assertEquals(200, $job->payload['status']);
+            $this->assertEquals(true, $job->payload['up']);
+            $this->assertNotNull($job->payload['time']);
+            $this->assertNotNull($job->payload['id']);
+
+            return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
+                in_array($job->headers['Signature'], [
+                    hash_hmac('sha256', json_encode($job->payload), 'secret1'),
+                    hash_hmac('sha256', json_encode($job->payload), 'secret2'),
+                ]);
+        });
     }
 }

@@ -44,9 +44,12 @@ trait SendsWebhooks
             ($webhookUrls = $this->option('webhook-url')) &&
             ($webhookSecrets = $this->option('webhook-secret'))
         ) {
-            return collect([$webhookUrls, $webhookSecrets])->mapSpread(function ($url, $secret) {
-                return compact('url', 'secret');
-            })->toArray();
+            return collect($webhookUrls)
+                ->zip($webhookSecrets)
+                ->mapSpread(function ($url, $secret) {
+                    return compact('url', 'secret');
+                })
+                ->toArray();
         }
 
         return [];
