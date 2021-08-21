@@ -18,7 +18,10 @@
     "require": {
         "php": "^7.3|^8.0",
         "guzzlehttp/guzzle": "^7.3.0",
+        "illuminate/bus": "^8.0",
+        "illuminate/database": "^8.40",
         "illuminate/http": "^8.0",
+        "illuminate/queue": "^8.0",
         "illuminate/support": "^8.55",
         "laravel-zero/framework": "^8.8",
         "promphp/prometheus_client_php": "^2.2",
@@ -26,6 +29,7 @@
         "spatie/laravel-webhook-server": "^2.1"
     },
     "require-dev": {
+        "fakerphp/faker": "^1.9.1",
         "intonate/tinker-zero": "^1.2",
         "mockery/mockery": "^1.4.3",
         "phpunit/phpunit": "^9.5"
