@@ -22,15 +22,17 @@ trait RunsHttpChecks
             $client->accept($this->option('accept-header'))
                 ->timeout($this->getTimeout());
 
-            if ($headers = $this->option('headers') ?: env('HTTP_HEADERS')) {
-                $client->withHeaders(json_decode($headers, true));
+            if ($this->option('header')) {
+                $client->withHeaders(
+                    $this->parseOptionAsKeyValue('header'),
+                );
             }
 
             // Authentication
             if ($username = $this->option('username') ?: env('HTTP_USERNAME')) {
                 $password = $this->option('password') ?: env('HTTP_PASSWORD');
 
-                if ($this->option('digest-auth') ?: env('HTTP_DIGEST_AUTH')) {
+                if ($this->option('digest-auth')) {
                     $this->line(
                         string: 'Setting digest auth...',
                         verbosity: 'v',

@@ -25,7 +25,7 @@ class WatchResource extends Command
         {--method=GET : The method for the HTTP call.}
         {--body= : JSON-formatted string with the body to call.}
         {--post-as-form : Send the request as form, with the application/x-www-form-urlencoded header.}
-        {--headers= : JSON-formatted list of key-value strings to set as heaers.}
+        {--header=* : Array list of key-value strings to set as headers.}
         {--accept-header=application/json : The Accept header value.}
         {--timeout=10 : The timeout of the request, in seconds.}
         {--interval=10 : The interval between checks, in seconds.}
@@ -137,6 +137,22 @@ class WatchResource extends Command
         $interval = (float) $this->option('interval');
 
         return $timeout > $interval ? $interval : $timeout;
+    }
+
+    /**
+     * Transform key=value pairs from the array option
+     * into key-value array.
+     *
+     * @param  string  $option
+     * @return array
+     */
+    protected function parseOptionAsKeyValue(string $option): array
+    {
+        return collect($this->option($option))->mapWithKeys(function ($pair) {
+            [$key, $value] = explode('=', $pair);
+
+            return [$key => $value];
+        })->toArray();
     }
 
     /**

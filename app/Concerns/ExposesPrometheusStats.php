@@ -120,12 +120,7 @@ trait ExposesPrometheusStats
      */
     protected function getPrometheusLabelsWithValues(): array
     {
-        return collect($this->option('prometheus-label'))
-            ->mapWithKeys(function ($pair) {
-                [$key, $value] = explode('=', $pair);
-
-                return [$key => $value];
-            })
-            ->toArray();
+        /** @var \App\Commands\WatchResource $this */
+        return $this->parseOptionAsKeyValue('prometheus-label');
     }
 }

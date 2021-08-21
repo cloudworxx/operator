@@ -36,11 +36,14 @@ trait SendsWebhooks
      */
     protected function getWebhooksWithSecrets(): array
     {
-        if ($webhooks = env('WEBHOOKS')) {
+        if ($webhooks = env('HTTP_WEBHOOKS')) {
             return json_decode($webhooks, true);
         }
 
-        if ($webhookUrls = $this->option('webhook-url') && $webhookSecrets = $this->option('webhook-secret')) {
+        if (
+            ($webhookUrls = $this->option('webhook-url')) &&
+            ($webhookSecrets = $this->option('webhook-secret'))
+        ) {
             return collect([$webhookUrls, $webhookSecrets])->mapSpread(function ($url, $secret) {
                 return compact('url', 'secret');
             })->toArray();

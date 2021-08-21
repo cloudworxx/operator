@@ -11,7 +11,7 @@ class HttpTest extends TestCase
     public function test_http_get()
     {
         Http::fake([
-            '*' => Http::response('OK', 200),
+            'google.test' => Http::response('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
@@ -20,14 +20,16 @@ class HttpTest extends TestCase
         ]);
 
         Http::assertSent(function (Request $request) {
-            return $request->url() === 'https://google.test';
+            $this->assertEquals('https://google.test', $request->url());
+
+            return true;
         });
     }
 
     public function test_http_post()
     {
         Http::fake([
-            '*' => Http::response('OK', 200),
+            'google.test' => Http::response('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
@@ -51,7 +53,7 @@ class HttpTest extends TestCase
     public function test_http_post_as_form()
     {
         Http::fake([
-            '*' => Http::response('OK', 200),
+            'google.test' => Http::response('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
@@ -76,7 +78,7 @@ class HttpTest extends TestCase
     public function test_token_authentication()
     {
         Http::fake([
-            '*' => Http::response('OK', 200),
+            'google.test' => Http::response('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
@@ -98,7 +100,7 @@ class HttpTest extends TestCase
     public function test_http_basic_authentication()
     {
         Http::fake([
-            '*' => Http::response('OK', 200),
+            'google.test' => Http::response('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
@@ -110,7 +112,62 @@ class HttpTest extends TestCase
         ]);
 
         Http::assertSent(function (Request $request) {
-            return $request->url() === 'https://google.test';
+            $this->assertEquals('https://google.test', $request->url());
+
+            return true;
         });
+    }
+
+    public function test_headers()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+        ]);
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--header' => [
+                'X-Header-One=one',
+                'X-Header-Two=two',
+            ],
+            '--once' => true,
+        ]);
+
+        Http::assertSent(function (Request $request) {
+            $this->assertEquals('https://google.test', $request->url());
+            $this->assertEquals(['one'], $request->header('X-Header-One'));
+            $this->assertEquals(['two'], $request->header('X-Header-Two'));
+
+            return true;
+        });
+    }
+
+    public function test_webhooks()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+            'webhook1.test' => Http::response('OK', 200),
+            'webhook2.test' => Http::response('OK', 200),
+        ]);
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
+            '--webhook-secret' => ['secret1', 'secret2'],
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+            function (Request $request) {
+                dd($request);
+
+                return true;
+            }
+        ]);
     }
 }

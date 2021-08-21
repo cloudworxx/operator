@@ -39,6 +39,18 @@ php artisan watch:resource \
     --timeout=30
 ```
 
+## Send headers
+
+You may send headers with the `--header` flag:
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --header=X-My-Header=3600 \
+    --header=X-Other-Header=abc \
+    --header=X-Another-Header=xxxx
+```
+
 ## Authenticate with Basic Auth or Auth Digest
 
 ```bash
@@ -58,6 +70,31 @@ php artisan watch:resource \
     --digest-auth
 ```
 
+Optionally you may pass the username & password via environment variables and omit the flags:
+
+```bash
+export HTTP_USERNAME=admin
+export HTTP_PASSWORD=secretpassword
+
+php artisan watch:resource --http-url=https://google.com
+```
+
+## Authenticate with Bearer token
+
+Same as with the Basic Auth, you can pass the token via flag or environment variable:
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --bearer-token=xxxxxxx
+```
+
+```bash
+export HTTP_BEARER_TOKEN=xxxxxxxx
+
+php artisan watch:resource --http-url=https://google.com
+```
+
 ## Pushgateway Export
 
 Status Operator can push the uptime metrics to a Prometheus instance via Pushgateway. To enable it, a Pushgateway URL should be provided:
@@ -72,6 +109,44 @@ php artisan watch:resource \
     --prometheus-label=user_id=1 \
     --prometheus-label=app_id=1 \
     --verbose
+```
+
+## Webhooks
+
+You can catch externally the downtime/uptime events via webhooks. You may define the links where you want a HTTP POST request to be sent to. The payload sent will be hashed using the HMAC of the POST body, using the defined secret.
+
+The webhooks are being called using an `Opsiebot/1.0` User-Agent header, so make sure it gets whitelisted in case you are automatically block any `*bot` user agents.
+
+```bash
+php artisan watch:resource \
+    --http-url=https://google.com \
+    --webhook-url=https://mywebsite1.com \
+    --webhook-secret=some-secret-1 \
+    --webhook-url=https://mywebsite2.com \
+    --webhook-secret=some-secret-2
+```
+
+**Make sure that the number of `--webhook-url` flags is the same as `--webhook-secret`.**
+
+You may alternatively define it using a environment variable called `WEBHOOKS` that contains a JSON-encoded string that looks like this:
+
+```json
+[
+    {
+        "url": "https://mywebsite1.com",
+        "secret": "some-secret-1"
+    },
+    {
+        "url": "https://mywebsite2.com",
+        "secret": "some-secret-2"
+    }
+]
+```
+
+```bash
+export HTTP_WEBHOOKS='[{"url": "https://mywebsite1.com", "secret": ...}]'
+
+php artisan watch:resource --http-url=https://google.com
 ```
 
 ## Docker
