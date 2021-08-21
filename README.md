@@ -149,6 +149,10 @@ export HTTP_WEBHOOKS='[{"url": "https://mywebsite1.com", "secret": ...}]'
 php artisan watch:resource --http-url=https://google.com
 ```
 
+The webhooks are being sent using [spatie/laravel-webhook-server](https://github.com/spatie/laravel-webhook-secret), a package that does the job in the background of sending the webhooks. The webhooks are signed with a `Signature` header in the request which value is calculated using the [`hash_hmac` of the JSON-encoded sent body with the webhook secret](https://github.com/spatie/laravel-webhook-server#how-signing-requests-works). Make sure to check this header when receiving the webhooks.
+
+For Laravel applications, you may want to simplify this process by using [spatie/laravel-webhook-client](https://github.com/spatie/laravel-webhook-client).
+
 ## Docker
 
 The production versions are being automatically bundled into a Docker image. [Head over to quay.io](https://quay.io/repository/opsie/operator) to see the available versions.
