@@ -16,7 +16,7 @@ class PrometheusTest extends TestCase
                 ->push('500 Error', 500),
             'pushgateway.test/*' => Http::sequence()
                 ->push('OK', 200)
-                ->push('OK', 200)
+                ->push('OK', 200),
         ]);
 
         $this->artisan('watch:resource', [
