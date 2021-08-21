@@ -11,8 +11,23 @@ class PrometheusTest extends TestCase
     public function test_pushgateway_push()
     {
         Http::fake([
-            'google.test' => Http::response('OK', 200),
-            'pushgateway.test/*' => Http::response('OK', 200),
+            'google.test' => Http::sequence()
+                ->push('OK', 200)
+                ->push('500 Error', 500),
+            'pushgateway.test/*' => Http::sequence()
+                ->push('OK', 200)
+                ->push('OK', 200)
+        ]);
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--prometheus-identifier' => 'test',
+            '--prometheus-label' => [
+                'label1=value1',
+                'label2=value2',
+            ],
+            '--pushgateway-url' => 'https://pushgateway.test',
+            '--once' => true,
         ]);
 
         $this->artisan('watch:resource', [
@@ -28,7 +43,9 @@ class PrometheusTest extends TestCase
 
         Http::assertSentInOrder([
             function (Request $request) {
-                return $request->url() === 'https://google.test';
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
             },
             function (Request $request) {
                 $this->assertEquals(
@@ -40,6 +57,26 @@ class PrometheusTest extends TestCase
 
                 $this->assertStringContainsString(
                     'test_uptime{label1="value1",label2="value2"} 1',
+                    array_values($request->data())[0],
+                );
+
+                return true;
+            },
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+            function (Request $request) {
+                $this->assertEquals(
+                    'https://pushgateway.test/metrics/job/test/label1/value1/label2/value2',
+                    $request->url(),
+                );
+
+                $this->assertEquals('PUT', $request->method());
+
+                $this->assertStringContainsString(
+                    'test_uptime{label1="value1",label2="value2"} 0',
                     array_values($request->data())[0],
                 );
 
