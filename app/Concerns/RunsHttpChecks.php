@@ -14,6 +14,8 @@ trait RunsHttpChecks
     protected function runHttpChecks(): void
     {
         /** @var \App\Commands\WatchResource $this */
+        $this->line('The operator started.');
+
         while (true) {
             $client = $this->option('post-as-form')
                 ? Http::asForm()
