@@ -29,6 +29,26 @@ php artisan watch:resource \
     --interval=5
 ```
 
+## Compiling from source
+
+The examples are based on the `php artisan watch:resource` command that is available in development, where you have the source code.
+
+To compile from source and use directly the binary, you may pull the project, install dependencies and build the binary:
+
+```bash
+composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader --no-dev
+```
+
+```bash
+php artisan app:build opsie-status-operator --build-version=stable
+```
+
+Within the `builds/` folder, you will find a `opsie-status-operator` file. This is the executable that will serve the needed `watch:resource` command instead of carrying around the source each time you want to run the operator.
+
+```bash
+opsie-status-operator watch:resource --http-url="https://google.com"
+```
+
 ## Increase timeout
 
 The default timeout is `10` seconds, but it may be changed:
