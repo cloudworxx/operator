@@ -79,6 +79,9 @@ class WatchResource extends Command
             $this->line('Setting the HTTP checks protocol...');
             $this->runHttpChecks();
         }
+
+        $this->isDown = false;
+        $this->initialCheckWasMade = false;
     }
 
     /**
