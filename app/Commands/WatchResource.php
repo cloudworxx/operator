@@ -40,6 +40,7 @@ class WatchResource extends Command
         {--webhook-url=* : Array list of webhook URLs.}
         {--webhook-secret=* : Array list of secrets to sign the webhook URLs with.}
         {--identifier= : An unique identifier for the current running process.}
+        {--skip-initial-check : Skip the initial check and don\'t send notifications if the website is already up.}
     ';
 
     /**
@@ -50,16 +51,37 @@ class WatchResource extends Command
     protected $description = 'Run the operator to watch a specific connection.';
 
     /**
+     * Wether the service is down, to avoid duplicate webhooks.
+     *
+     * @var bool
+     */
+    protected bool $isDown = false;
+
+    /**
+     * Whether the initial check was done.
+     *
+     * @var bool
+     */
+    protected $initialCheckWasMade = false;
+
+    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
+        if ($this->option('skip-initial-check')) {
+            $this->initialCheckWasMade = true;
+        }
+
         if ($this->option('http-url') ?: env('HTTP_URL')) {
             $this->line('Setting the HTTP checks protocol...');
             $this->runHttpChecks();
         }
+
+        $this->isDown = false;
+        $this->initialCheckWasMade = false;
     }
 
     /**
@@ -68,8 +90,19 @@ class WatchResource extends Command
      * @param  array  $payload
      * @return void
      */
-    protected function markUptime(array $payload): void
+    protected function markUptime(array $payload)
     {
+        $this->isDown = false;
+
+        if ($this->initialCheckWasMade) {
+            return $this->line(
+                string: 'Website is up, but the notifications were already sent.',
+                verbosity: 'v',
+            );
+        }
+
+        $this->initialCheckWasMade = true;
+
         $this->line(
             string: 'Website is up.',
             verbosity: 'v',
@@ -91,8 +124,19 @@ class WatchResource extends Command
      * @param  array  $payload
      * @return void
      */
-    protected function markDowntime(array $payload): void
+    protected function markDowntime(array $payload)
     {
+        $this->isDown = true;
+
+        if ($this->initialCheckWasMade) {
+            return $this->line(
+                string: 'Website is down, but the notifications were already sent.',
+                verbosity: 'v',
+            );
+        }
+
+        $this->initialCheckWasMade = true;
+
         $this->error(
             string: 'Website is down.',
             verbosity: 'v',
