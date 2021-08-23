@@ -62,7 +62,7 @@ trait ExposesPrometheusStats
     {
         return $this->getPrometheus()->getOrRegisterGauge(
             namespace: $this->getPrometheusNamespace(),
-            name: 'response_time',
+            name: 'response_time_ms',
             help: 'The service response time, in miliseconds.',
             labels: $this->getPrometheusLabels(),
         );

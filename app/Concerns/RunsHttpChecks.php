@@ -64,13 +64,14 @@ trait RunsHttpChecks
                 json_decode($this->option('body') ?: env('HTTP_BODY'), true),
             );
 
-            $responseTime = $response->transferStats->getTransferTime() ?: 0;
+            $responseTime = ($response->transferStats->getTransferTime() ?: 0) * 1000;
 
             $payload = [
                 'status' => $response->status(),
                 'up' => $response->successful(),
                 'headers' => $response->headers(),
                 'time' => now()->toIso8601String(),
+                'response_time_ms' => $responseTime,
                 'id' => $this->getIdentifier(),
             ];
 

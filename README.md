@@ -148,7 +148,7 @@ php artisan watch:resource \
 
 **Make sure that the number of `--webhook-url` flags is the same as `--webhook-secret`.**
 
-You may alternatively define it using a environment variable called `WEBHOOKS` that contains a JSON-encoded string that looks like this:
+You may alternatively define it using a environment variable called `HTTP_WEBHOOKS` that contains a JSON-encoded string that looks like this:
 
 ```json
 [
@@ -172,6 +172,21 @@ php artisan watch:resource --http-url=https://google.com
 The webhooks are being sent using [spatie/laravel-webhook-server](https://github.com/spatie/laravel-webhook-secret), a package that does the job in the background of sending the webhooks. The webhooks are signed with a `Signature` header in the request which value is calculated using the [`hash_hmac` of the JSON-encoded sent body with the webhook secret](https://github.com/spatie/laravel-webhook-server#how-signing-requests-works). Make sure to check this header when receiving the webhooks.
 
 For Laravel applications, you may want to simplify this process by using [spatie/laravel-webhook-client](https://github.com/spatie/laravel-webhook-client).
+
+The webhook payload that is being sent will look like this:
+
+```json
+{
+    "status": 200,
+    "up": true,
+    "headers": {
+        "X-Header-One": "value"
+    },
+    "time": "2021-08-23T20:41:28+00:00",
+    "response_time_ms": 230,
+    "id": "231c3d85-16ea-41bc-a980-9b584b0fc9b3"
+}
+```
 
 ## Docker
 

@@ -183,6 +183,7 @@ class HttpTest extends TestCase
             $this->assertEquals(true, $job->payload['up']);
             $this->assertNotNull($job->payload['time']);
             $this->assertNotNull($job->payload['id']);
+            $this->assertNotNull($job->payload['response_time_ms']);
 
             return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
                 in_array($job->headers['Signature'], [
