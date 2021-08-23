@@ -50,6 +50,20 @@ class WatchResource extends Command
     protected $description = 'Run the operator to watch a specific connection.';
 
     /**
+     * Wether the service is down, to avoid duplicate webhooks.
+     *
+     * @var bool
+     */
+    protected bool $isDown = false;
+
+    /**
+     * Whether the initial check was done.
+     *
+     * @var bool
+     */
+    protected $initialCheck = false;
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -70,6 +84,12 @@ class WatchResource extends Command
      */
     protected function markUptime(array $payload): void
     {
+        if ($this->initialCheck && ! $this->isDown) {
+            $this->initialCheck = true;
+
+            return;
+        }
+
         $this->line(
             string: 'Website is up.',
             verbosity: 'v',
@@ -93,6 +113,12 @@ class WatchResource extends Command
      */
     protected function markDowntime(array $payload): void
     {
+        if ($this->initialCheck && $this->isDown) {
+            $this->initialCheck = true;
+
+            return;
+        }
+
         $this->error(
             string: 'Website is down.',
             verbosity: 'v',
