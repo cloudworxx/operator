@@ -214,4 +214,27 @@ class HttpTest extends TestCase
 
         Queue::assertNothingPushed();
     }
+
+    public function test_do_not_send_notifications_if_website_is_down_at_initial_check()
+    {
+        Http::fake([
+            'google.test' => Http::response('Server Error', 500),
+        ]);
+
+        Queue::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
+            '--webhook-secret' => ['secret1', 'secret2'],
+            '--skip-initial-check' => true,
+            '--once' => true,
+        ]);
+
+        Http::assertNotSent(function (Request $request) {
+            return in_array($request->url(), ['https://webhook1.test', 'https://webhook2.test']);
+        });
+
+        Queue::assertNothingPushed();
+    }
 }

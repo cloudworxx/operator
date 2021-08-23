@@ -62,7 +62,7 @@ class WatchResource extends Command
      *
      * @var bool
      */
-    protected $initialCheck = false;
+    protected $initialCheckWasMade = false;
 
     /**
      * Execute the console command.
@@ -72,7 +72,7 @@ class WatchResource extends Command
     public function handle()
     {
         if ($this->option('skip-initial-check')) {
-            $this->initialCheck = true;
+            $this->initialCheckWasMade = true;
         }
 
         if ($this->option('http-url') ?: env('HTTP_URL')) {
@@ -89,14 +89,16 @@ class WatchResource extends Command
      */
     protected function markUptime(array $payload)
     {
-        if ($this->initialCheck && ! $this->isDown) {
+        $this->isDown = false;
+
+        if ($this->initialCheckWasMade) {
             return $this->line(
                 string: 'Website is up, but the notifications were already sent.',
                 verbosity: 'v',
             );
         }
 
-        $this->initialCheck = true;
+        $this->initialCheckWasMade = true;
 
         $this->line(
             string: 'Website is up.',
@@ -121,14 +123,16 @@ class WatchResource extends Command
      */
     protected function markDowntime(array $payload)
     {
-        if ($this->initialCheck && $this->isDown) {
+        $this->isDown = true;
+
+        if ($this->initialCheckWasMade) {
             return $this->line(
                 string: 'Website is down, but the notifications were already sent.',
                 verbosity: 'v',
             );
         }
 
-        $this->initialCheck = true;
+        $this->initialCheckWasMade = true;
 
         $this->error(
             string: 'Website is down.',
