@@ -82,10 +82,13 @@ class WatchResource extends Command
      * @param  array  $payload
      * @return void
      */
-    protected function markUptime(array $payload): void
+    protected function markUptime(array $payload)
     {
         if ($this->initialCheck && ! $this->isDown) {
-            return;
+            return $this->line(
+                string: 'Website is up, but the notifications were already sent.',
+                verbosity: 'v',
+            );
         }
 
         $this->initialCheck = true;
@@ -111,10 +114,13 @@ class WatchResource extends Command
      * @param  array  $payload
      * @return void
      */
-    protected function markDowntime(array $payload): void
+    protected function markDowntime(array $payload)
     {
         if ($this->initialCheck && $this->isDown) {
-            return;
+            return $this->line(
+                string: 'Website is down, but the notifications were already sent.',
+                verbosity: 'v',
+            );
         }
 
         $this->initialCheck = true;
