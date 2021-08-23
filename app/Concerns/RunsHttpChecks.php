@@ -64,6 +64,8 @@ trait RunsHttpChecks
                 json_decode($this->option('body') ?: env('HTTP_BODY'), true),
             );
 
+            $responseTime = $response->transferStats->getTransferTime() ?: 0;
+
             $payload = [
                 'status' => $response->status(),
                 'up' => $response->successful(),
@@ -73,9 +75,9 @@ trait RunsHttpChecks
             ];
 
             if ($response->failed()) {
-                $this->markDowntime($payload);
+                $this->markDowntime($payload, $responseTime);
             } else {
-                $this->markUptime($payload);
+                $this->markUptime($payload, $responseTime);
             }
 
             if ($this->option('once')) {

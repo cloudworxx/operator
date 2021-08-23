@@ -88,9 +88,10 @@ class WatchResource extends Command
      * Mark the status as up.
      *
      * @param  array  $payload
+     * @param  int  $responseTime
      * @return void
      */
-    protected function markUptime(array $payload)
+    protected function markUptime(array $payload, int $responseTime)
     {
         $this->isDown = false;
 
@@ -113,7 +114,8 @@ class WatchResource extends Command
             verbosity: 'v',
         );
 
-        $this->getPrometheusGauge()->set(1, $this->getPrometheusLabelsWithValues());
+        $this->getPrometheusUptimeGauge()->set(1, $this->getPrometheusLabelsWithValues());
+        $this->getPrometheusResponseTimeGauge()->set($responseTime, $this->getPrometheusLabelsWithValues());
         $this->pingPushgateway();
         $this->sendWebhooks($payload);
     }
@@ -122,9 +124,10 @@ class WatchResource extends Command
      * Mark the status as down.
      *
      * @param  array  $payload
+     * @param  int  $responseTime
      * @return void
      */
-    protected function markDowntime(array $payload)
+    protected function markDowntime(array $payload, int $responseTime)
     {
         $this->isDown = true;
 
@@ -147,7 +150,8 @@ class WatchResource extends Command
             verbosity: 'v',
         );
 
-        $this->getPrometheusGauge()->set(0, $this->getPrometheusLabelsWithValues());
+        $this->getPrometheusUptimeGauge()->set(0, $this->getPrometheusLabelsWithValues());
+        $this->getPrometheusResponseTimeGauge()->set($responseTime, $this->getPrometheusLabelsWithValues());
         $this->pingPushgateway();
         $this->sendWebhooks($payload);
     }

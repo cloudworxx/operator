@@ -43,12 +43,27 @@ trait ExposesPrometheusStats
      *
      * @return \Prometheus\Gauge
      */
-    protected function getPrometheusGauge(): Gauge
+    protected function getPrometheusUptimeGauge(): Gauge
     {
         return $this->getPrometheus()->getOrRegisterGauge(
             namespace: $this->getPrometheusNamespace(),
             name: 'uptime',
             help: 'The service uptime, either 1 or 0.',
+            labels: $this->getPrometheusLabels(),
+        );
+    }
+
+    /**
+     * Get the Prometheus gauge for the response time.
+     *
+     * @return \Prometheus\Gauge
+     */
+    protected function getPrometheusResponseTimeGauge(): Gauge
+    {
+        return $this->getPrometheus()->getOrRegisterGauge(
+            namespace: $this->getPrometheusNamespace(),
+            name: 'response_time',
+            help: 'The service response time, in miliseconds.',
             labels: $this->getPrometheusLabels(),
         );
     }
