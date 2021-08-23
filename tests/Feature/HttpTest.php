@@ -18,6 +18,7 @@ class HttpTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -41,6 +42,7 @@ class HttpTest extends TestCase
                 'name' => 'test',
                 'some_value' => 1,
             ]),
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -66,6 +68,7 @@ class HttpTest extends TestCase
                 'some_value' => 1,
             ]),
             '--post-as-form' => true,
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -86,6 +89,7 @@ class HttpTest extends TestCase
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
             '--bearer-token' => 'testing',
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -110,6 +114,7 @@ class HttpTest extends TestCase
             '--username' => 'testing',
             '--password' => 'secret',
             '--digest-auth' => true,
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -132,6 +137,7 @@ class HttpTest extends TestCase
                 'X-Header-One=one',
                 'X-Header-Two=two',
             ],
+            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -184,5 +190,28 @@ class HttpTest extends TestCase
                     hash_hmac('sha256', json_encode($job->payload), 'secret2'),
                 ]);
         });
+    }
+
+    public function test_do_not_send_notifications_if_website_is_up_at_initial_check()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+        ]);
+
+        Queue::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
+            '--webhook-secret' => ['secret1', 'secret2'],
+            '--skip-initial-check' => true,
+            '--once' => true,
+        ]);
+
+        Http::assertNotSent(function (Request $request) {
+            return in_array($request->url(), ['https://webhook1.test', 'https://webhook2.test']);
+        });
+
+        Queue::assertNothingPushed();
     }
 }

@@ -40,6 +40,7 @@ class WatchResource extends Command
         {--webhook-url=* : Array list of webhook URLs.}
         {--webhook-secret=* : Array list of secrets to sign the webhook URLs with.}
         {--identifier= : An unique identifier for the current running process.}
+        {--skip-initial-check : Skip the initial check and don\'t send notifications if the website is already up.}
     ';
 
     /**
@@ -70,6 +71,10 @@ class WatchResource extends Command
      */
     public function handle()
     {
+        if ($this->option('skip-initial-check')) {
+            $this->initialCheck = true;
+        }
+
         if ($this->option('http-url') ?: env('HTTP_URL')) {
             $this->line('Setting the HTTP checks protocol...');
             $this->runHttpChecks();
