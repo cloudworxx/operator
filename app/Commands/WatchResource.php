@@ -85,10 +85,10 @@ class WatchResource extends Command
     protected function markUptime(array $payload): void
     {
         if ($this->initialCheck && ! $this->isDown) {
-            $this->initialCheck = true;
-
             return;
         }
+
+        $this->initialCheck = true;
 
         $this->line(
             string: 'Website is up.',
@@ -114,10 +114,10 @@ class WatchResource extends Command
     protected function markDowntime(array $payload): void
     {
         if ($this->initialCheck && $this->isDown) {
-            $this->initialCheck = true;
-
             return;
         }
+
+        $this->initialCheck = true;
 
         $this->error(
             string: 'Website is down.',
