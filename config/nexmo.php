@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'api_key'    => function_exists('env') ? env('NEXMO_KEY', '') : '',
+    'api_key' => function_exists('env') ? env('NEXMO_KEY', '') : '',
     'api_secret' => function_exists('env') ? env('NEXMO_SECRET', '') : '',
 
     /*
@@ -52,8 +52,10 @@ return [
     |
     */
 
-    'app' => ['name' => function_exists('env') ? env('NEXMO_APP_NAME', 'NexmoLaravel') : 'NexmoLaravel',
-    'version' => function_exists('env') ? env('NEXMO_APP_VERSION', '1.1.2') : '1.1.2'],
+    'app' => [
+        'name' => function_exists('env') ? env('NEXMO_APP_NAME', 'NexmoLaravel') : 'NexmoLaravel',
+        'version' => function_exists('env') ? env('NEXMO_APP_VERSION', '1.1.2') : '1.1.2',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -66,4 +68,5 @@ return [
     */
 
     'http_client' => function_exists('env') ? env('NEXMO_HTTP_CLIENT', '') : '',
+
 ];

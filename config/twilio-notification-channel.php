@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     'username' => env('TWILIO_USERNAME'), // optional when using auth token
     'password' => env('TWILIO_PASSWORD'), // optional when using auth token
     'auth_token' => env('TWILIO_AUTH_TOKEN'), // optional when using username and password
@@ -33,4 +34,5 @@ return [
         21614, // 'To' number is not a valid mobile number
         21408, // Permission to send an SMS has not been enabled for the region indicated by the 'To' number
     ],
+
 ];
