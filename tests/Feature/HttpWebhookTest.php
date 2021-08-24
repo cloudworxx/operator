@@ -1,4 +1,4 @@
-test_discord_webhooks_via_flags<?php
+<?php
 
 namespace Tests\Feature;
 
