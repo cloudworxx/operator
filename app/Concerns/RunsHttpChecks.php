@@ -58,21 +58,24 @@ trait RunsHttpChecks
                 $client->withToken($token);
             }
 
+            $url = $this->option('http-url') ?: env('HTTP_URL');
+
             /** @var \Illuminate\Http\Client\Response $response */
             $response = $client->{$this->option('method')}(
-                $this->option('http-url') ?: env('HTTP_URL'),
+                $url,
                 json_decode($this->option('body') ?: env('HTTP_BODY'), true),
             );
 
             $responseTime = ($response->transferStats->getTransferTime() ?: 0) * 1000;
 
             $payload = [
+                'url' => $url,
                 'status' => $response->status(),
                 'up' => $response->successful(),
                 'headers' => $response->headers(),
                 'time' => now()->toIso8601String(),
                 'response_time_ms' => $responseTime,
-                'id' => $this->getIdentifier(),
+                'instance_id' => $this->getIdentifier(),
             ];
 
             if ($response->failed()) {

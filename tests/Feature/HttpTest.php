@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Queue;
-use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
 class HttpTest extends TestCase
@@ -148,94 +146,5 @@ class HttpTest extends TestCase
 
             return true;
         });
-    }
-
-    public function test_webhooks()
-    {
-        Http::fake([
-            'google.test' => Http::response('OK', 200),
-            'webhook1.test' => Http::response('OK', 200),
-            'webhook2.test' => Http::response('OK', 200),
-        ]);
-
-        Queue::fake();
-
-        $this->artisan('watch:resource', [
-            '--http-url' => 'https://google.test',
-            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
-            '--webhook-secret' => ['secret1', 'secret2'],
-            '--once' => true,
-        ]);
-
-        Http::assertSentInOrder([
-            function (Request $request) {
-                $this->assertEquals('https://google.test', $request->url());
-
-                return true;
-            },
-        ]);
-
-        Queue::assertPushed(CallWebhookJob::class, function ($job) {
-            $this->assertEquals('post', $job->httpVerb);
-            $this->assertEquals(1, $job->tries);
-            $this->assertEquals('Opsiebot/1.0', $job->headers['User-Agent']);
-            $this->assertEquals(200, $job->payload['status']);
-            $this->assertEquals(true, $job->payload['up']);
-            $this->assertNotNull($job->payload['time']);
-            $this->assertNotNull($job->payload['id']);
-            $this->assertNotNull($job->payload['response_time_ms']);
-
-            return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
-                in_array($job->headers['Signature'], [
-                    hash_hmac('sha256', json_encode($job->payload), 'secret1'),
-                    hash_hmac('sha256', json_encode($job->payload), 'secret2'),
-                ]);
-        });
-    }
-
-    public function test_do_not_send_notifications_if_website_is_up_at_initial_check()
-    {
-        Http::fake([
-            'google.test' => Http::response('OK', 200),
-        ]);
-
-        Queue::fake();
-
-        $this->artisan('watch:resource', [
-            '--http-url' => 'https://google.test',
-            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
-            '--webhook-secret' => ['secret1', 'secret2'],
-            '--skip-initial-check' => true,
-            '--once' => true,
-        ]);
-
-        Http::assertNotSent(function (Request $request) {
-            return in_array($request->url(), ['https://webhook1.test', 'https://webhook2.test']);
-        });
-
-        Queue::assertNothingPushed();
-    }
-
-    public function test_do_not_send_notifications_if_website_is_down_at_initial_check()
-    {
-        Http::fake([
-            'google.test' => Http::response('Server Error', 500),
-        ]);
-
-        Queue::fake();
-
-        $this->artisan('watch:resource', [
-            '--http-url' => 'https://google.test',
-            '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
-            '--webhook-secret' => ['secret1', 'secret2'],
-            '--skip-initial-check' => true,
-            '--once' => true,
-        ]);
-
-        Http::assertNotSent(function (Request $request) {
-            return in_array($request->url(), ['https://webhook1.test', 'https://webhook2.test']);
-        });
-
-        Queue::assertNothingPushed();
     }
 }
