@@ -1,4 +1,4 @@
-<?php
+test_discord_webhooks_via_flags<?php
 
 namespace Tests\Feature;
 
@@ -159,7 +159,6 @@ class HttpWebhookTest extends TestCase
                 ]);
         });
     }
-
 
     public function test_discord_webhooks_via_flags()
     {
