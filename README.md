@@ -4,6 +4,7 @@ Opsie Operator
 ![CI](https://github.com/opsie-app/operator/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/opsie-app/operator/branch/master/graph/badge.svg)](https://codecov.io/gh/opsie-app/operator)
 [![StyleCI](https://github.styleci.io/repos/397491616/shield?branch=master)](https://github.styleci.io/repos/397491616)
+![License](https://img.shields.io/github/license/opsie-app/operator)
 
 Monitor any website. Run in Docker or any Kubernetes cluster. Send webhooks.
 
