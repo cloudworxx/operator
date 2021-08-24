@@ -192,7 +192,7 @@ class HttpTest extends TestCase
             $this->assertNotNull($job->payload['response_time_ms']);
 
             return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
-                in_array($job->payload['url'], ['https://webhook1.test', 'https://webhook2.test']) &&
+                $job->payload['url'] === 'https://google.test' &&
                 in_array($job->headers['Signature'], [
                     hash_hmac('sha256', json_encode($job->payload), 'secret1'),
                     hash_hmac('sha256', json_encode($job->payload), 'secret2'),
