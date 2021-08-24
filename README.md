@@ -1,5 +1,5 @@
-Soketi Network Watcher
-=======================
+Opsie Operator
+==============
 
 ![CI](https://github.com/opsie-app/operator/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/opsie-app/operator/branch/master/graph/badge.svg)](https://codecov.io/gh/opsie-app/operator)
