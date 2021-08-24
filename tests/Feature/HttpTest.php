@@ -2,9 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Notifiable;
+use App\Notifications\StateNotification;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Twilio\TwilioChannel;
+use SnoerenDevelopment\DiscordWebhook\DiscordWebhookChannel;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
@@ -191,6 +197,194 @@ class HttpTest extends TestCase
                     hash_hmac('sha256', json_encode($job->payload), 'secret1'),
                     hash_hmac('sha256', json_encode($job->payload), 'secret2'),
                 ]);
+        });
+    }
+
+    public function test_discord_webhooks()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+            'discord.test' => Http::response('OK', 200),
+        ]);
+
+        Notification::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--discord-webhook-url' => ['https://discord.test'],
+            '--identifier' => 'test',
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+        ]);
+
+        Notification::assertSentTo(new Notifiable(id: 'test'), StateNotification::class, function ($notification, $channels, $notifiable) {
+            $this->assertEquals(200, $notification->payload['status']);
+            $this->assertEquals(true, $notification->payload['up']);
+            $this->assertNotNull($notification->payload['time']);
+            $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertNotNull($notification->payload['response_time_ms']);
+
+            $this->assertEquals([DiscordWebhookChannel::class], $channels);
+            $this->assertEquals('https://discord.test', $notifiable->discordWebhookUrl);
+
+            return true;
+        });
+    }
+
+    public function test_slack_webhooks()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+            'slack.test' => Http::response('OK', 200),
+        ]);
+
+        Notification::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--slack-webhook-url' => ['https://slack.test'],
+            '--slack-webhook-channel' => ['#test'],
+            '--identifier' => 'test',
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+        ]);
+
+        Notification::assertSentTo(new Notifiable(id: 'test'), StateNotification::class, function ($notification, $channels, $notifiable) {
+            $this->assertEquals(200, $notification->payload['status']);
+            $this->assertEquals(true, $notification->payload['up']);
+            $this->assertNotNull($notification->payload['time']);
+            $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertNotNull($notification->payload['response_time_ms']);
+
+            $this->assertEquals(['slack'], $channels);
+            $this->assertEquals('https://slack.test', $notifiable->slackWebhookUrl);
+
+            return true;
+        });
+    }
+
+    public function test_nexmo_numbers()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+        ]);
+
+        Notification::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--nexmo-sms-number' => ['5555555555'],
+            '--identifier' => 'test',
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+        ]);
+
+        Notification::assertSentTo(new Notifiable(id: 'test'), StateNotification::class, function ($notification, $channels, $notifiable) {
+            $this->assertEquals(200, $notification->payload['status']);
+            $this->assertEquals(true, $notification->payload['up']);
+            $this->assertNotNull($notification->payload['time']);
+            $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertNotNull($notification->payload['response_time_ms']);
+
+            $this->assertEquals(['nexmo'], $channels);
+            $this->assertEquals('5555555555', $notifiable->nexmoNumber);
+
+            return true;
+        });
+    }
+
+    public function test_twilio_numbers()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+        ]);
+
+        Notification::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--twilio-sms-number' => ['5555555555'],
+            '--identifier' => 'test',
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+        ]);
+
+        Notification::assertSentTo(new Notifiable(id: 'test'), StateNotification::class, function ($notification, $channels, $notifiable) {
+            $this->assertEquals(200, $notification->payload['status']);
+            $this->assertEquals(true, $notification->payload['up']);
+            $this->assertNotNull($notification->payload['time']);
+            $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertNotNull($notification->payload['response_time_ms']);
+
+            $this->assertEquals([TwilioChannel::class], $channels);
+            $this->assertEquals('5555555555', $notifiable->twilioNumber);
+
+            return true;
+        });
+    }
+
+    public function test_fcm_tokens()
+    {
+        Http::fake([
+            'google.test' => Http::response('OK', 200),
+        ]);
+
+        Notification::fake();
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--fcm-token' => ['5555555555'],
+            '--identifier' => 'test',
+            '--once' => true,
+        ]);
+
+        Http::assertSentInOrder([
+            function (Request $request) {
+                $this->assertEquals('https://google.test', $request->url());
+
+                return true;
+            },
+        ]);
+
+        Notification::assertSentTo(new Notifiable(id: 'test'), StateNotification::class, function ($notification, $channels, $notifiable) {
+            $this->assertEquals(200, $notification->payload['status']);
+            $this->assertEquals(true, $notification->payload['up']);
+            $this->assertNotNull($notification->payload['time']);
+            $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertNotNull($notification->payload['response_time_ms']);
+
+            $this->assertEquals([FcmChannel::class], $channels);
+            $this->assertEquals('5555555555', $notifiable->fcmToken);
+
+            return true;
         });
     }
 

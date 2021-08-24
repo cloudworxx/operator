@@ -54,8 +54,11 @@ return [
     */
 
     'providers' => [
+        Illuminate\Notifications\NotificationServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         Spatie\WebhookServer\WebhookServerServiceProvider::class,
+        Nexmo\Laravel\NexmoServiceProvider::class,
+        NotificationChannels\Twilio\TwilioProvider::class,
     ],
 
 ];

@@ -4,6 +4,7 @@ namespace App\Commands;
 
 use App\Concerns\ExposesPrometheusStats;
 use App\Concerns\RunsHttpChecks;
+use App\Concerns\SendsNotifications;
 use App\Concerns\SendsWebhooks;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
@@ -13,6 +14,7 @@ class WatchResource extends Command
 {
     use ExposesPrometheusStats;
     use RunsHttpChecks;
+    use SendsNotifications;
     use SendsWebhooks;
 
     /**
@@ -39,6 +41,12 @@ class WatchResource extends Command
         {--pushgateway-url= : The URL for Pushgateway metrics collection.}
         {--webhook-url=* : Array list of webhook URLs.}
         {--webhook-secret=* : Array list of secrets to sign the webhook URLs with.}
+        {--discord-webhook-url=* : Array list of Discord webhook URLs.}
+        {--slack-webhook-url=* : Array list of Slack webhook URLs.}
+        {--slack-webhook-channel=* : Array list of Slack channels to send messages to for each webhook URL.}
+        {--nexmo-sms-number=* : Array list of Nexmo numbers to send messages to.}
+        {--twilio-sms-number=* : Array list of Twilio numbers to send messages to.}
+        {--fcm-token=* : Array list of FCM tokens to send messages to.}
         {--identifier= : An unique identifier for the current running process.}
         {--skip-initial-check : Skip the initial check and don\'t send notifications if the website is already up.}
     ';
@@ -76,7 +84,7 @@ class WatchResource extends Command
         }
 
         if ($this->option('http-url') ?: env('HTTP_URL')) {
-            $this->line('Setting the HTTP checks protocol...');
+            $this->info('Setting the HTTP checks protocol...');
             $this->runHttpChecks();
         }
 
@@ -96,7 +104,7 @@ class WatchResource extends Command
         $this->isDown = false;
 
         if ($this->initialCheckWasMade) {
-            return $this->line(
+            return $this->info(
                 string: 'Website is up, but the notifications were already sent.',
                 verbosity: 'v',
             );
@@ -104,8 +112,8 @@ class WatchResource extends Command
 
         $this->initialCheckWasMade = true;
 
-        $this->line(
-            string: 'Website is up.',
+        $this->info(
+            string: 'Website was checked and it\'s back online.',
             verbosity: 'v',
         );
 
@@ -118,6 +126,7 @@ class WatchResource extends Command
         $this->getPrometheusResponseTimeGauge()->set($responseTime, $this->getPrometheusLabelsWithValues());
         $this->pingPushgateway();
         $this->sendWebhooks($payload);
+        $this->sendNotifications($payload);
     }
 
     /**
@@ -132,7 +141,7 @@ class WatchResource extends Command
         $this->isDown = true;
 
         if ($this->initialCheckWasMade) {
-            return $this->line(
+            return $this->info(
                 string: 'Website is down, but the notifications were already sent.',
                 verbosity: 'v',
             );
@@ -141,11 +150,11 @@ class WatchResource extends Command
         $this->initialCheckWasMade = true;
 
         $this->error(
-            string: 'Website is down.',
+            string: 'Website was checked and it\'s now offline.',
             verbosity: 'v',
         );
 
-        $this->error(
+        $this->line(
             string: "[{$payload['time']}] HTTP Status: {$payload['status']}",
             verbosity: 'v',
         );
@@ -154,6 +163,7 @@ class WatchResource extends Command
         $this->getPrometheusResponseTimeGauge()->set($responseTime, $this->getPrometheusLabelsWithValues());
         $this->pingPushgateway();
         $this->sendWebhooks($payload);
+        $this->sendNotifications($payload);
     }
 
     /**

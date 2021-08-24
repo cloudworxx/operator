@@ -26,6 +26,11 @@ trait SendsWebhooks
                     'User-Agent' => 'Opsiebot/1.0',
                 ])
                 ->dispatch();
+
+            $this->line(
+                string: "Sent webhook to {$webhook['url']}.",
+                verbosity: 'v',
+            );
         }
     }
 
