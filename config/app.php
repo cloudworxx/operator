@@ -58,6 +58,7 @@ return [
         App\Providers\AppServiceProvider::class,
         Spatie\WebhookServer\WebhookServerServiceProvider::class,
         Nexmo\Laravel\NexmoServiceProvider::class,
+        Kreait\Laravel\Firebase\ServiceProvider::class,
         NotificationChannels\Twilio\TwilioProvider::class,
     ],
 
