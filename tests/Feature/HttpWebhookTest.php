@@ -31,6 +31,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
             '--webhook-secret' => ['secret1', 'secret2'],
             '--skip-initial-check' => true,
@@ -54,6 +55,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
             '--webhook-secret' => ['secret1', 'secret2'],
             '--skip-initial-check' => true,
@@ -79,6 +81,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--webhook-url' => ['https://webhook1.test', 'https://webhook2.test'],
             '--webhook-secret' => ['secret1', 'secret2'],
             '--once' => true,
@@ -100,6 +103,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $job->payload['up']);
             $this->assertNotNull($job->payload['time']);
             $this->assertNotNull($job->payload['instance_id']);
+            $this->assertArrayHasKey('region', $job->payload['metadata']);
             $this->assertNotNull($job->payload['response_time_ms']);
 
             return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
@@ -130,6 +134,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--once' => true,
         ]);
 
@@ -149,6 +154,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $job->payload['up']);
             $this->assertNotNull($job->payload['time']);
             $this->assertNotNull($job->payload['instance_id']);
+            $this->assertArrayHasKey('region', $job->payload['metadata']);
             $this->assertNotNull($job->payload['response_time_ms']);
 
             return in_array($job->webhookUrl, ['https://webhook1.test', 'https://webhook2.test']) &&
@@ -171,6 +177,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--discord-webhook-url' => ['https://discord.test'],
             '--identifier' => 'test',
             '--once' => true,
@@ -189,6 +196,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([DiscordWebhookChannel::class], $channels);
@@ -217,6 +225,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--identifier' => 'test',
             '--once' => true,
         ]);
@@ -234,6 +243,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([DiscordWebhookChannel::class], $channels);
@@ -254,6 +264,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--slack-webhook-url' => ['https://slack.test'],
             '--slack-webhook-channel' => ['#test'],
             '--identifier' => 'test',
@@ -273,6 +284,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals(['slack'], $channels);
@@ -305,6 +317,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--identifier' => 'test',
             '--once' => true,
         ]);
@@ -322,6 +335,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals(['slack'], $channels);
@@ -347,6 +361,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--identifier' => 'test',
             '--once' => true,
         ]);
@@ -364,6 +379,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals(['nexmo'], $channels);
@@ -387,6 +403,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--nexmo-sms-number' => ['5555555555'],
             '--identifier' => 'test',
             '--once' => true,
@@ -405,6 +422,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals(['nexmo'], $channels);
@@ -424,6 +442,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--twilio-sms-number' => ['5555555555'],
             '--identifier' => 'test',
             '--once' => true,
@@ -442,6 +461,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([TwilioChannel::class], $channels);
@@ -471,6 +491,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--identifier' => 'test',
             '--once' => true,
         ]);
@@ -488,6 +509,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([TwilioChannel::class], $channels);
@@ -507,6 +529,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--fcm-token' => ['5555555555'],
             '--identifier' => 'test',
             '--once' => true,
@@ -525,6 +548,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([FcmChannel::class], $channels);
@@ -554,6 +578,7 @@ class HttpWebhookTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
+            '--metadata' => ['region=us'],
             '--identifier' => 'test',
             '--once' => true,
         ]);
@@ -571,6 +596,7 @@ class HttpWebhookTest extends TestCase
             $this->assertEquals(true, $notification->payload['up']);
             $this->assertNotNull($notification->payload['time']);
             $this->assertNotNull($notification->payload['instance_id']);
+            $this->assertArrayHasKey('region', $notification->payload['metadata']);
             $this->assertNotNull($notification->payload['response_time_ms']);
 
             $this->assertEquals([FcmChannel::class], $channels);

@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 
 trait RunsHttpChecks
@@ -60,28 +61,41 @@ trait RunsHttpChecks
 
             $url = $this->option('http-url') ?: env('HTTP_URL');
 
-            /** @var \Illuminate\Http\Client\Response $response */
-            $response = $client->{$this->option('method')}(
-                $url,
-                json_decode($this->option('body') ?: env('HTTP_BODY'), true),
-            );
-
-            $responseTime = ($response->transferStats->getTransferTime() ?: 0) * 1000;
-
             $payload = [
                 'url' => $url,
-                'status' => $response->status(),
-                'up' => $response->successful(),
-                'headers' => $response->headers(),
                 'time' => now()->toIso8601String(),
-                'response_time_ms' => $responseTime,
                 'instance_id' => $this->getIdentifier(),
+                'metadata' => $this->getMetadata(),
+                'responseTime' => $responseTime = 0,
             ];
 
-            if ($response->failed()) {
-                $this->markDowntime($payload, $responseTime);
-            } else {
+            /** @var \Illuminate\Http\Client\Response $response */
+            try {
+                $response = $client->{$this->option('method')}(
+                    $url,
+                    json_decode($this->option('body') ?: env('HTTP_BODY'), true),
+                );
+
+                $responseTime = ($response->transferStats->getTransferTime() ?: 0) * 1000;
+
+                $payload = array_merge($payload, [
+                    'status' => $response->status(),
+                    'up' => $response->successful(),
+                    'headers' => $response->headers(),
+                    'response_time_ms' => $responseTime,
+                ]);
+            } catch (Exception $e) {
+                $payload = array_merge($payload, [
+                    'status' => 0,
+                    'up' => false,
+                    'headers' => [],
+                ]);
+            }
+
+            if ($payload['up']) {
                 $this->markUptime($payload, $responseTime);
+            } else {
+                $this->markDowntime($payload, $responseTime);
             }
 
             if ($this->option('once')) {

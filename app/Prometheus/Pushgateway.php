@@ -3,6 +3,7 @@
 namespace App\Prometheus;
 
 use Closure;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
@@ -12,6 +13,7 @@ class Pushgateway
     /**
      * Initialize the Pushgateway protocol.
      *
+     * @param  string  $url
      * @return void
      */
     public function __construct(protected string $url)
@@ -27,7 +29,7 @@ class Pushgateway
      * @param  array  $tags
      * @param  string  $method
      * @param  \Closure|null  $callback
-     * @return \Illuminate\Http\Client\Response
+     * @return void
      */
     public function push(
         CollectorRegistry $registry,
@@ -35,7 +37,7 @@ class Pushgateway
         array $tags = [],
         string $method = 'put',
         Closure $callback = null,
-    ) {
+    ): void {
         $client = Http::contentType(RenderTextFormat::MIME_TYPE)
             ->timeout(30)
             ->withOptions([
@@ -46,12 +48,16 @@ class Pushgateway
             $client = $callback($client, $job, $tags);
         }
 
-        return $client->{$method}(
-            $this->buildUrl($job, $tags),
-            ! in_array($method, ['delete', 'get'])
-                ? (new RenderTextFormat)->render($registry->getMetricFamilySamples())
-                : [],
-        );
+        try {
+            $client->{$method}(
+                $this->buildUrl($job, $tags),
+                ! in_array($method, ['delete', 'get'])
+                    ? (new RenderTextFormat)->render($registry->getMetricFamilySamples())
+                    : [],
+            );
+        } catch (Exception $e) {
+            //
+        }
     }
 
     /**
@@ -61,10 +67,8 @@ class Pushgateway
      * @param  array  $tags
      * @return string
      */
-    protected function buildUrl(
-        string $job,
-        array $tags = [],
-    ): string {
+    protected function buildUrl(string $job, array $tags = []): string
+    {
         $url = "{$this->url}/metrics/job/{$job}";
 
         foreach ($tags as $tag => $value) {

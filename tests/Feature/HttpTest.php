@@ -16,7 +16,6 @@ class HttpTest extends TestCase
 
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -40,7 +39,6 @@ class HttpTest extends TestCase
                 'name' => 'test',
                 'some_value' => 1,
             ]),
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -66,7 +64,6 @@ class HttpTest extends TestCase
                 'some_value' => 1,
             ]),
             '--post-as-form' => true,
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -87,7 +84,6 @@ class HttpTest extends TestCase
         $this->artisan('watch:resource', [
             '--http-url' => 'https://google.test',
             '--bearer-token' => 'testing',
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -112,7 +108,6 @@ class HttpTest extends TestCase
             '--username' => 'testing',
             '--password' => 'secret',
             '--digest-auth' => true,
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -135,7 +130,6 @@ class HttpTest extends TestCase
                 'X-Header-One=one',
                 'X-Header-Two=two',
             ],
-            '--skip-initial-check' => true,
             '--once' => true,
         ]);
 
@@ -146,5 +140,19 @@ class HttpTest extends TestCase
 
             return true;
         });
+    }
+
+    public function test_http_client_errors_are_caught()
+    {
+        Http::fake([
+            //
+        ]);
+
+        $this->artisan('watch:resource', [
+            '--http-url' => 'https://google.test',
+            '--once' => true,
+        ]);
+
+        Http::assertNothingSent();
     }
 }

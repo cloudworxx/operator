@@ -81,9 +81,9 @@ trait ExposesPrometheusStats
         }
 
         $this->getPushgatewayClient($url)->push(
-            $this->getPrometheus(),
-            $this->getPrometheusNamespace(),
-            $this->getPrometheusLabelsWithValues(),
+            registry: $this->getPrometheus(),
+            job: $this->getPrometheusNamespace(),
+            tags: $this->getPrometheusLabelsWithValues(),
         );
     }
 
@@ -136,6 +136,9 @@ trait ExposesPrometheusStats
     protected function getPrometheusLabelsWithValues(): array
     {
         /** @var \App\Commands\WatchResource $this */
-        return $this->parseOptionAsKeyValue('prometheus-label');
+        return array_merge(
+            $this->parseOptionAsKeyValue('prometheus-label'),
+            $this->getMetadata(),
+        );
     }
 }

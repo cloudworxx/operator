@@ -37,7 +37,8 @@ class WatchResource extends Command
         {--bearer-token= : The Bearer token to authorize the request. Gets overwritten if --username is set.}
         {--once : Perform only one check, without monitoring the resource.}
         {--prometheus-identifier= : The identifier for Prometheus exports.}
-        {--prometheus-label=* : Array list of value strings to set as Prometheus labels.}
+        {--prometheus-label=* : Array list of key=value strings to set as Prometheus labels.}
+        {--metadata=* : Array list of key=value strings to set as metadata to Prometheus and to send off to payloads.}
         {--pushgateway-url= : The URL for Pushgateway metrics collection.}
         {--webhook-url=* : Array list of webhook URLs.}
         {--webhook-secret=* : Array list of secrets to sign the webhook URLs with.}
@@ -195,6 +196,16 @@ class WatchResource extends Command
         $interval = (float) $this->option('interval');
 
         return $timeout > $interval ? $interval : $timeout;
+    }
+
+    /**
+     * Get the metadata array with key-values.
+     *
+     * @return array
+     */
+    protected function getMetadata(): array
+    {
+        return $this->parseOptionAsKeyValue('metadata');
     }
 
     /**
