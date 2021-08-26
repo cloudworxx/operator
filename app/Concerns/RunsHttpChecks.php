@@ -66,7 +66,7 @@ trait RunsHttpChecks
                 'time' => now()->toIso8601String(),
                 'instance_id' => $this->getIdentifier(),
                 'metadata' => $this->getMetadata(),
-                'responseTime' => $responseTime = 0,
+                'response_time_ms' => $responseTime = 0,
             ];
 
             /** @var \Illuminate\Http\Client\Response $response */
