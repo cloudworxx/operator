@@ -1374,16 +1374,16 @@
         },
         {
             "name": "illuminate/broadcasting",
-            "version": "v8.55.0",
+            "version": "v8.58.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/broadcasting.git",
-                "reference": "3c77c7847f7cbcb56243e09bbb187094c2f5a116"
+                "reference": "28afa2d498aa61ef52a7c1dc57da1fc1a24cabd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/broadcasting/zipball/3c77c7847f7cbcb56243e09bbb187094c2f5a116",
-                "reference": "3c77c7847f7cbcb56243e09bbb187094c2f5a116",
+                "url": "https://api.github.com/repos/illuminate/broadcasting/zipball/28afa2d498aa61ef52a7c1dc57da1fc1a24cabd3",
+                "reference": "28afa2d498aa61ef52a7c1dc57da1fc1a24cabd3",
                 "shasum": ""
             },
             "require": {
@@ -1426,7 +1426,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2021-07-27T12:56:14+00:00"
+            "time": "2021-08-26T14:48:34+00:00"
         },
         {
             "name": "illuminate/bus",
@@ -2090,7 +2090,7 @@
         },
         {
             "name": "illuminate/mail",
-            "version": "v8.55.0",
+            "version": "v8.58.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/mail.git",
@@ -2151,7 +2151,7 @@
         },
         {
             "name": "illuminate/notifications",
-            "version": "v8.55.0",
+            "version": "v8.58.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/notifications.git",
